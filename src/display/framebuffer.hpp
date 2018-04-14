@@ -4,6 +4,7 @@
 #include <cstdint>
 #include <cstring>
 #include <stdexcept>
+#include <memory>
 
 #include <unistd.h>
 #include <fcntl.h>
@@ -12,6 +13,7 @@
 #include <sys/mman.h>
 
 #include "pixel.hpp"
+#include "../sprite.hpp"
 
 namespace display {
     struct Framebuffer {
@@ -20,16 +22,17 @@ namespace display {
         struct fb_fix_screeninfo info_fix;
         struct fb_var_screeninfo info_var;
         size_t size;
-        uint8_t * buffer;
+        uint8_t * frame_buffer{0};
+        std::unique_ptr<uint8_t[]> backing_buffer;
 
         uint8_t * buffer_location(size_t const x, size_t const y) const {
-            return buffer +
+            return backing_buffer.get() +
                 (info_var.xoffset + x) * (info_var.bits_per_pixel / 8) +
                 (info_var.yoffset + y) * (info_fix.line_length);
         }
 
     public:
-        void update_info_var() {
+        void update_metadata() {
             if (ioctl(file, FBIOGET_VSCREENINFO, &info_var))
                 throw std::runtime_error(std::strerror(errno));
         }
@@ -43,7 +46,7 @@ namespace display {
                 throw std::runtime_error(std::strerror(errno));
             }
             
-            update_info_var();
+            update_metadata();
 
             size = (
                 info_var.xres *
@@ -51,19 +54,21 @@ namespace display {
                 (info_var.bits_per_pixel / 8)
             );
             
-            buffer = reinterpret_cast<uint8_t *>(
+            frame_buffer = reinterpret_cast<uint8_t *>(
                 mmap(
                     0, size,
                     PROT_READ | PROT_WRITE, MAP_SHARED,
                     file, 0
                 )
             );
-            if (reinterpret_cast<long>(buffer) == -1)
+            if (reinterpret_cast<long>(frame_buffer) == -1)
                 throw std::runtime_error("Error mapping device to memory");
+            
+            backing_buffer = decltype(backing_buffer){new uint8_t[size]};
         }
 
         ~Framebuffer() {
-            munmap(buffer, size);
+            if (frame_buffer) munmap(frame_buffer, size);
             close(file);
         }
 
@@ -77,6 +82,11 @@ namespace display {
                 info_var.xres, info_var.yres,
                 info_var.bits_per_pixel
             );
+        }
+
+        void refresh() {
+            memcpy(frame_buffer, backing_buffer.get(), size);
+            memset(backing_buffer.get(), 0, size);
         }
 
         void write_pixel(size_t const x, size_t const y, Pixel const color) {
@@ -94,7 +104,24 @@ namespace display {
                 *pixel16 = color.as_16bit();
                 break;   
             }
+        }
 
+        void write_sprite(
+            size_t const x,
+            size_t const y,
+            sprite::Sprite const & sprite
+        ) {
+            Pixel const white { 255, 255, 255, 255 };
+            for     (size_t sprite_y{0}; sprite_y < sprite::HEIGHT; sprite_y++) {
+                for (size_t sprite_x{0}; sprite_x < sprite::WIDTH;  sprite_x++) {
+                    if (sprite.get(sprite_x, sprite_y))
+                        write_pixel(
+                            x + sprite_x,
+                            y + sprite_y,
+                            white
+                        );
+                }
+            }
         }
     };
 }

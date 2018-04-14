@@ -4,13 +4,12 @@
 #include <array>
 
 namespace sprite {
-    struct Sprite {
-        static constexpr size_t
-            HEIGHT{8},
-            WIDTH{12};
+    static constexpr size_t
+        HEIGHT{8},
+        WIDTH{12};
+    using Image = std::array<bool, HEIGHT * WIDTH>;
 
-        using Image = std::array<bool, HEIGHT * WIDTH>;
-        
+    struct Sprite {
     private:
         Image image;
 
@@ -20,22 +19,6 @@ namespace sprite {
         constexpr bool get(size_t const x, size_t const y) const {
             size_t const index{(y * WIDTH) + x};
             return image[index];
-        }
-        
-        void print_ascii(
-            std::array<char, (((WIDTH * 2) + 1) * HEIGHT) + 1> & buffer
-        ) const {
-            char * inserter{&buffer[0]};
-
-            for     (int y{0}; y < HEIGHT; y++) {
-                for (int x{0}; x < WIDTH;  x++) {
-                    char to_insert = get(x, y) ? '#' : ' ';
-                    *(inserter++) = to_insert;
-                    *(inserter++) = to_insert;
-                }
-                *(inserter++) = '\n';
-            }
-            *inserter = '\0';
         }
     };
 
