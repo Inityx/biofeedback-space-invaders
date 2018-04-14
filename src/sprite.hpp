@@ -1,3 +1,6 @@
+#ifndef SPRITE_HPP
+#define SPRITE_HPP
+
 #include <array>
 
 namespace sprite {
@@ -12,11 +15,27 @@ namespace sprite {
         Image image;
 
     public:
-        constexpr Sprite(Image image) : image(image) {}
+        constexpr Sprite(Image const & image) : image(image) {}
 
-        bool get(size_t const x, size_t const y) const {
+        constexpr bool get(size_t const x, size_t const y) const {
             size_t const index{(y * WIDTH) + x};
             return image[index];
+        }
+        
+        void print_ascii(
+            std::array<char, (((WIDTH * 2) + 1) * HEIGHT) + 1> & buffer
+        ) const {
+            char * inserter{&buffer[0]};
+
+            for     (int y{0}; y < HEIGHT; y++) {
+                for (int x{0}; x < WIDTH;  x++) {
+                    char to_insert = get(x, y) ? '#' : ' ';
+                    *(inserter++) = to_insert;
+                    *(inserter++) = to_insert;
+                }
+                *(inserter++) = '\n';
+            }
+            *inserter = '\0';
         }
     };
 
@@ -97,3 +116,5 @@ namespace sprite {
         1,1,0,0,0,0,0,0,0,0,1,1
     }};
 }
+
+#endif
