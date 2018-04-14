@@ -1,3 +1,10 @@
+# vim files
+*.swp
+*.swo
+
+# Visual Studio Code
+.vscode
+
 # Prerequisites
 *.d
 
