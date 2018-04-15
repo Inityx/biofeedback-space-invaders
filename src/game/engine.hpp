@@ -6,6 +6,8 @@
 
 namespace game {
     struct Engine {
+        enum struct Direction { Left, Right };
+
         struct Enemy {
             enum struct State { Up, Down, Dead };
 
@@ -38,6 +40,13 @@ namespace game {
                 return sprite::SpriteView { current_sprite(), x, y };
             }
 
+            void nudge(Direction direction) {
+                switch (direction) {
+                    case Direction::Left:  x -= 1; break;
+                    case Direction::Right: x += 1; break;
+                }
+            }
+
             void flap() {
                 switch (state) {
                     case State::Up:   state = State::Down; break;
@@ -54,51 +63,50 @@ namespace game {
             SPACING_V{sprite::HEIGHT * 3};
 
         std::vector<Enemy> enemies;
+        Direction direction{Direction::Right};
 
-        Engine() {
-            for (size_t col{0}; col < COLUMNS; col++) {
-                enemies.push_back(
-                    Enemy {
-                        MARGIN_H + (col * SPACING_H),
-                        SPACING_V,
-                        sprite::ALIEN2_UP,
-                        sprite::ALIEN2_DOWN,
-                        sprite::EXPLOSION
-                    }
-                );
-            }
-
-            for (size_t row{0}; row < 2; row++) {
+        void add_enemy_rows(
+            size_t num_rows,
+            size_t start_row,
+            sprite::Sprite const & up,
+            sprite::Sprite const & down
+        ) {
+            for (size_t row{0}; row < num_rows; row++) {
                 for (size_t col{0}; col < COLUMNS; col++) {
+                    size_t const
+                        x{MARGIN_H + (col * SPACING_H)},
+                        y{(SPACING_V * (start_row + 1)) + (row * SPACING_V)};
+                    
                     enemies.push_back(
-                        Enemy {
-                            MARGIN_H + (col * SPACING_H),
-                            (SPACING_V * 2) + (row * SPACING_V),
-                            sprite::ALIEN1_UP,
-                            sprite::ALIEN1_DOWN,
-                            sprite::EXPLOSION
-                        }
-                    );
-                }
-            }
-
-            for (size_t row{0}; row < 2; row++) {
-                for (size_t col{0}; col < COLUMNS; col++) {
-                    enemies.push_back(
-                        Enemy {
-                            MARGIN_H + (col * SPACING_H),
-                            (SPACING_V * 4) + (row * SPACING_V),
-                            sprite::ALIEN3_UP,
-                            sprite::ALIEN3_DOWN,
-                            sprite::EXPLOSION
-                        }
+                        Enemy { x, y, up, down, sprite::EXPLOSION }
                     );
                 }
             }
         }
 
+        Engine() {
+            add_enemy_rows(1, 0, sprite::ALIEN2_UP, sprite::ALIEN2_DOWN);
+            add_enemy_rows(2, 1, sprite::ALIEN1_UP, sprite::ALIEN1_DOWN);
+            add_enemy_rows(2, 3, sprite::ALIEN3_UP, sprite::ALIEN3_DOWN);
+        }
+
+        void reverse() {
+            switch (direction) {
+                case Direction::Left:  direction = Direction::Right; break;
+                case Direction::Right: direction = Direction::Left;  break;
+            }
+        }
+
         void step() {
-            for (auto & enemy : enemies) enemy.flap();
+            // TODO If <direction>-most enemy is at edge, reverse
+            
+            // if (at_edge) reverse();
+
+            for (auto & enemy : enemies) {
+                enemy.nudge(direction);
+                enemy.flap();
+            }
+
         }
 
         std::vector<sprite::SpriteView> render() {

@@ -16,7 +16,7 @@ namespace game {
         
         Engine & engine;
         display::Framebuffer & fb;
-        std::chrono::milliseconds delay{800};
+        std::chrono::milliseconds delay{200};
 
     public:
         Interface(Engine & engine, display::Framebuffer & fb)
