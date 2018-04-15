@@ -6,6 +6,10 @@
 
 namespace game {
     struct Engine {
+        static const size_t
+            TARGET_WIDTH{480},
+            TARGET_HEIGHT{320};
+        
         enum struct Direction { Left, Right };
 
         struct Enemy {
@@ -40,6 +44,8 @@ namespace game {
                 return sprite::SpriteView { current_sprite(), x, y };
             }
 
+            void drop(size_t amount) { y += amount; }
+
             void nudge(Direction direction) {
                 switch (direction) {
                     case Direction::Left:  x -= 1; break;
@@ -56,13 +62,17 @@ namespace game {
             }
         };
 
+    private:
         static size_t const
             COLUMNS{14},
-            MARGIN_H{20},
+            MARGIN_H{40},
             SPACING_H{sprite::WIDTH * 2},
-            SPACING_V{sprite::HEIGHT * 3};
+            SPACING_V{sprite::HEIGHT * 3},
+            PLAYER_HEIGHT{TARGET_HEIGHT - (SPACING_V * 2) },
+            PLAYER_SPEED{4};
 
         std::vector<Enemy> enemies;
+        size_t player_x{(TARGET_WIDTH / 2) - 1};
         Direction direction{Direction::Right};
 
         void add_enemy_rows(
@@ -84,35 +94,84 @@ namespace game {
             }
         }
 
+        bool edge_bounce() {
+            if (direction == Direction::Right) {
+                size_t max{0};
+
+                for (auto & enemy : enemies)
+                    if (enemy.x > max)
+                        max = enemy.x;
+                
+                if (max >= (TARGET_WIDTH - MARGIN_H - sprite::WIDTH)) {
+                    direction = Direction::Left;
+                    return true;
+                }
+                return false;
+                
+            } else {
+                size_t min{SIZE_MAX};
+
+                for (auto & enemy : enemies)
+                    if (enemy.x < min)
+                        min = enemy.x;
+                
+                if (min <= MARGIN_H) {
+                    direction = Direction::Right;
+                    return true;
+                }
+                return false;
+            }
+        }
+
+    public:
         Engine() {
             add_enemy_rows(1, 0, sprite::ALIEN2_UP, sprite::ALIEN2_DOWN);
             add_enemy_rows(2, 1, sprite::ALIEN1_UP, sprite::ALIEN1_DOWN);
             add_enemy_rows(2, 3, sprite::ALIEN3_UP, sprite::ALIEN3_DOWN);
         }
 
-        void reverse() {
-            switch (direction) {
-                case Direction::Left:  direction = Direction::Right; break;
-                case Direction::Right: direction = Direction::Left;  break;
-            }
-        }
-
-        void step() {
-            // TODO If <direction>-most enemy is at edge, reverse
-            
-            // if (at_edge) reverse();
-
+        bool enemy_step() {
+            bool const bounced = edge_bounce();
             for (auto & enemy : enemies) {
+                if (bounced)
+                    enemy.drop(SPACING_V);
                 enemy.nudge(direction);
                 enemy.flap();
+
+                if (enemy.y >= PLAYER_HEIGHT)
+                    return false;
             }
 
+            return true;
+        }
+
+        void move_player(Direction const direction) {
+            switch (direction) {
+                case Direction::Left:
+                    if (player_x > MARGIN_H)
+                        player_x -= PLAYER_SPEED;
+                    break;
+                
+                case Direction::Right:
+                    if (player_x < TARGET_WIDTH - MARGIN_H)
+                        player_x += PLAYER_SPEED;
+                    break;
+            }
         }
 
         std::vector<sprite::SpriteView> render() {
             std::vector<sprite::SpriteView> sprites;
             for (auto & enemy : enemies)
                 sprites.push_back(enemy.as_sprite_view());
+
+            sprites.push_back(
+                sprite::SpriteView {
+                    sprite::PLAYER,
+                    player_x,
+                    PLAYER_HEIGHT
+                }
+            );
+
             return sprites;
         }
     };
