@@ -1,5 +1,5 @@
 CXX=clang++
-CXXFLAGS=-g --std=c++17
+CXXFLAGS=-g --std=c++14
 
 NAME=bfsi
 
