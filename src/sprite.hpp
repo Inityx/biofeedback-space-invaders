@@ -1,23 +1,30 @@
+#ifndef SPRITE_HPP
+#define SPRITE_HPP
+
 #include <array>
 
 namespace sprite {
-    struct Sprite {
-        static constexpr size_t
-            HEIGHT{8},
-            WIDTH{12};
+    static constexpr size_t
+        HEIGHT{8},
+        WIDTH{12};
+    using Image = std::array<bool, HEIGHT * WIDTH>;
 
-        using Image = std::array<bool, HEIGHT * WIDTH>;
-        
+    struct Sprite {
     private:
         Image image;
 
     public:
-        constexpr Sprite(Image image) : image(image) {}
+        constexpr Sprite(Image const & image) : image(image) {}
 
-        bool get(size_t const x, size_t const y) const {
+        constexpr bool get(size_t const x, size_t const y) const {
             size_t const index{(y * WIDTH) + x};
             return image[index];
         }
+    };
+
+    struct SpriteView {
+        Sprite const & sprite;
+        size_t x, y;
     };
 
     constexpr Sprite PLAYER {{
@@ -31,7 +38,7 @@ namespace sprite {
         0,1,0,1,0,1,1,0,1,0,1,0
     }};
 
-    constexpr Sprite ALIEN1_F1 {{
+    constexpr Sprite ALIEN1_DOWN {{
         0,0,1,0,0,0,0,0,0,1,0,0,
         0,0,0,1,0,0,0,0,1,0,0,0,
         0,0,1,1,1,1,1,1,1,1,0,0,
@@ -41,8 +48,8 @@ namespace sprite {
         1,0,1,0,0,0,0,0,0,1,0,1,
         0,0,0,1,1,0,0,1,1,0,0,0
     }};
-
-    constexpr Sprite ALIEN1_F2 {{
+    
+    constexpr Sprite ALIEN1_UP {{
         0,0,1,0,0,0,0,0,0,1,0,0,
         1,0,0,1,0,0,0,0,1,0,0,1,
         1,0,1,1,1,1,1,1,1,1,0,1,
@@ -53,7 +60,7 @@ namespace sprite {
         0,1,0,0,0,0,0,0,0,0,1,0
     }};
 
-    constexpr Sprite ALIEN2_F1 {{
+    constexpr Sprite ALIEN2_DOWN {{
         0,0,0,0,0,1,1,0,0,0,0,0,
         0,0,0,0,1,1,1,1,0,0,0,0,
         0,0,0,1,1,1,1,1,1,0,0,0,
@@ -64,7 +71,7 @@ namespace sprite {
         0,0,1,0,1,0,0,1,0,1,0,0
     }};
 
-    constexpr Sprite ALIEN2_F2 {{
+    constexpr Sprite ALIEN2_UP {{
         0,0,0,0,0,1,1,0,0,0,0,0,
         0,0,0,0,1,1,1,1,0,0,0,0,
         0,0,0,1,1,1,1,1,1,0,0,0,
@@ -75,7 +82,7 @@ namespace sprite {
         0,0,0,0,1,0,0,1,0,0,0,0
     }};
 
-    constexpr Sprite ALIEN3_F1 {{
+    constexpr Sprite ALIEN3_DOWN {{
         0,0,0,0,1,1,1,1,0,0,0,0,
         0,1,1,1,1,1,1,1,1,1,1,0,
         1,1,1,1,1,1,1,1,1,1,1,1,
@@ -86,7 +93,7 @@ namespace sprite {
         0,0,1,1,0,0,0,0,1,1,0,0
     }};
 
-    constexpr Sprite ALIEN3_F2 {{
+    constexpr Sprite ALIEN3_UP {{
         0,0,0,0,1,1,1,1,0,0,0,0,
         0,1,1,1,1,1,1,1,1,1,1,0,
         1,1,1,1,1,1,1,1,1,1,1,1,
@@ -96,4 +103,17 @@ namespace sprite {
         0,0,1,1,0,1,1,0,1,1,0,0,
         1,1,0,0,0,0,0,0,0,0,1,1
     }};
+
+    constexpr Sprite EXPLOSION {{
+        0,1,0,0,0,1,0,0,0,0,0,0,
+        0,0,1,0,0,0,0,0,1,0,0,1,
+        0,0,0,1,0,0,0,1,0,0,1,0,
+        1,1,0,0,0,0,0,0,0,0,0,0,
+        0,0,0,0,0,0,0,0,0,0,1,1,
+        0,1,0,0,1,0,0,0,1,0,0,0,
+        1,0,0,1,0,0,0,0,0,1,0,0,
+        0,0,0,0,0,0,1,0,0,0,1,0
+    }};
 }
+
+#endif
