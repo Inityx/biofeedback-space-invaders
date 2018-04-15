@@ -4,14 +4,15 @@ CXXFLAGS=-g --std=c++17
 NAME=bfsi
 
 TARGET=build/$(NAME)
-TARGET_LIBS=$(wildcard src/*.hpp)
+LIBS=$(shell find . -type f -iname '*.hpp')
+$(info LIBS $(LIBS))
 
 all: $(TARGET) | build
 
 run: all
 	$(TARGET)
 
-$(TARGET): src/main.cpp $(TARGET_LIBS)
+$(TARGET): src/main.cpp $(LIBS)
 	$(CXX) $(CXXFLAGS) $< -o $@
 
 build:

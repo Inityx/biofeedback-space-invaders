@@ -123,6 +123,24 @@ namespace display {
                 }
             }
         }
+
+        void write_sprite_view(sprite::SpriteView const sv) {
+            write_sprite(sv.x, sv.y, sv.sprite);
+        }
+
+        void write_line_v(size_t start_x, size_t start_y, size_t len) {
+            Pixel const white { 255, 255, 255, 255 };
+            for (size_t y{start_y}; y < start_y + len; y++) {
+                write_pixel(start_x, y, white);
+            }
+        }
+
+        void write_line_h(size_t start_x, size_t start_y, size_t len) {
+            Pixel const white { 255, 255, 255, 255 };
+            for (size_t x{start_x}; x < start_x + len; x++) {
+                write_pixel(x, start_y, white);
+            }
+        }
     };
 }
 #endif

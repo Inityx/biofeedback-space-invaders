@@ -3,19 +3,19 @@
 
 #include "sprite.hpp"
 #include "display/framebuffer.hpp"
+#include "game/engine.hpp"
+#include "game/interface.hpp"
 
-using sprite::Sprite;
+char const * const FB_FILENAME{"/dev/fb0"};
 
-void framebuffer_test() {
-    display::Framebuffer fb{"/dev/fb0"};
-    
-    fb.write_sprite(20, 40, sprite::ALIEN);
-    fb.write_sprite(20, 65, sprite::PLAYER);
-    
-    fb.refresh();
-}
+using namespace game;
+using namespace display;
 
 int main() {
-    framebuffer_test();
+    Engine engine;
+    Framebuffer fb{FB_FILENAME};
+
+    Interface{engine, fb}.play();
     return 0;
 }
+
