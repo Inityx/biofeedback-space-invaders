@@ -48,23 +48,52 @@ namespace game {
         };
 
         static size_t const
-            COLUMNS{10},
-            MARGIN_H{40},
-            SPACING_H{20};
+            COLUMNS{14},
+            MARGIN_H{20},
+            SPACING_H{sprite::WIDTH * 2},
+            SPACING_V{sprite::HEIGHT * 3};
 
         std::vector<Enemy> enemies;
 
         Engine() {
-            for (size_t i{0}; i < COLUMNS; i++) {
+            for (size_t col{0}; col < COLUMNS; col++) {
                 enemies.push_back(
                     Enemy {
-                        MARGIN_H + (i * SPACING_H),
-                        200,
-                        sprite::ALIEN3_UP,
-                        sprite::ALIEN3_DOWN,
+                        MARGIN_H + (col * SPACING_H),
+                        SPACING_V,
+                        sprite::ALIEN2_UP,
+                        sprite::ALIEN2_DOWN,
                         sprite::EXPLOSION
                     }
                 );
+            }
+
+            for (size_t row{0}; row < 2; row++) {
+                for (size_t col{0}; col < COLUMNS; col++) {
+                    enemies.push_back(
+                        Enemy {
+                            MARGIN_H + (col * SPACING_H),
+                            (SPACING_V * 2) + (row * SPACING_V),
+                            sprite::ALIEN1_UP,
+                            sprite::ALIEN1_DOWN,
+                            sprite::EXPLOSION
+                        }
+                    );
+                }
+            }
+
+            for (size_t row{0}; row < 2; row++) {
+                for (size_t col{0}; col < COLUMNS; col++) {
+                    enemies.push_back(
+                        Enemy {
+                            MARGIN_H + (col * SPACING_H),
+                            (SPACING_V * 4) + (row * SPACING_V),
+                            sprite::ALIEN3_UP,
+                            sprite::ALIEN3_DOWN,
+                            sprite::EXPLOSION
+                        }
+                    );
+                }
             }
         }
 
