@@ -1,5 +1,5 @@
 CXX=clang++
-CXXFLAGS=-g --std=c++14 -lpthread -lncurses
+CXXFLAGS=-g -O2 --std=c++14 -lpthread -lncurses
 
 NAME=bfsi
 

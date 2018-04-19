@@ -23,9 +23,9 @@ namespace game {
         Engine & engine;
         display::Framebuffer & fb;
         std::chrono::milliseconds 
-            frame_delay{30},
-            enemy_delay{100};
-        std::atomic_uint8_t lose{0};
+            frame_delay{36},
+            enemy_delay{200};
+        std::atomic<uint8_t> lose{0};
 
     public:
         Interface(Engine & engine, display::Framebuffer & fb)
@@ -47,21 +47,22 @@ namespace game {
         }
 
         void play() {
-            std::thread
-                renderer     {render_loop,     this},
-                enemy_stepper{enemy_step_loop, this};
-
             // ncurses setup
             initscr();
             noecho();
             curs_set(0);
+
+            // Slave threads
+            std::thread
+                renderer     {render_loop,     this},
+                enemy_stepper{enemy_step_loop, this};
 
             while(!lose.load()) {
                 int const input{getch()};
                 switch (input) {
                     case 'a': engine.move_player(Engine::Direction::Left ); break;
                     case 'd': engine.move_player(Engine::Direction::Right); break;
-                    // case 'w': engine.fire(); break;
+                    case 'w': engine.fire(); break;
                     default: break;
                 }
             }

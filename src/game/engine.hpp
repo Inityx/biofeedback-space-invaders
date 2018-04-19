@@ -159,6 +159,10 @@ namespace game {
             }
         }
 
+        void fire() {
+            
+        }
+
         std::vector<sprite::SpriteView> render() {
             std::vector<sprite::SpriteView> sprites;
             for (auto & enemy : enemies)
